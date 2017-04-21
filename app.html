@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html ng-app="json-dictionary-merge">
+	<head>
+		<meta charset="UTF-8">
+
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+		<script src="app.js"></script>
+
+		<link rel="stylesheet" href="/style.css">
+	</head>
+	<body>
+		<form ng-controller="MergeController as mergeController">
+			<ul>
+				<li ng-repeat="dictionary in mergeController.inputDictionaries track by $index">
+					<textarea ng-model="dictionary.text"></textarea>
+					<input type="button" value="Remove" ng-click="mergeController.removeInputDictionary($index)">
+				</li>
+			</ul>
+			<input type="button" value="Add Dictionary" ng-click="mergeController.addInputDictionary()">
+
+			<ul>
+				<li ng-repeat="(strokes, conflicts) in mergeController.conflicts">
+					<label>{{strokes}}</label>
+					<select
+						ng-options="option for option in conflicts.options track by option"
+						ng-model="conflicts.selectedOption"
+						ng-change="mergeController.conflictOptionSelected(strokes, conflicts.selectedOption)">
+					</select>
+				</li>
+			</ul>
+
+			<input type="button" value="Update" ng-click="mergeController.update()">
+
+			<textarea ng-model="mergeController.outputDictionaryJson"></textarea>
+		</form>
+	</body>
+</html>

@@ -34,8 +34,6 @@
 
 			<hr>
 
-			<input type="button" value="Find Conflicts" ng-click="mergeController.findConflicts()">
-
 			<ul class="conflicts">
 				<li ng-repeat="conflict in mergeController.conflicts | toArray: 'strokes' | orderBy: 'strokes'">
 					<label>{{conflict.strokes}}</label>

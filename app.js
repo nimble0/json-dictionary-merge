@@ -83,10 +83,16 @@ angular.module('json-dictionary-merge', [])
 	this.removeInputFile = function(_index)
 	{
 		this.inputFiles.splice(_index, 1);
+		this.findConflicts();
 	};
 
 	this.inputFileSelected = function(_file)
 	{
+		this.outputDictionary = null;
+
+		var count = { _: _file.files.length};
+		this_ = this;
+
 		_file.content = [];
 		for(var i = 0; i < _file.files.length; ++i)
 		{
@@ -94,11 +100,14 @@ angular.module('json-dictionary-merge', [])
 			var fileReader = new FileReader();
 			fileReader.onload = function(e) {
 				_file.content.push(JSON.parse(e.target.result));
+				if(--count._ == 0)
+					$scope.$apply(function() { this_.findConflicts(); });
 			};
 			fileReader.readAsText(file, "UTF-8");
 		}
 
-		this.outputDictionary = null;
+		if(_file.files.length == 0)
+			this.findConflicts();
 	};
 
 	this.mergeDictionaries = function()

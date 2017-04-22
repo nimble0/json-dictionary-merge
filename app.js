@@ -1,20 +1,18 @@
 function mergeDictionaries(_dictionaries)
 {
-	var mergedDictionary = (_dictionaries[0] === undefined) ? {} : _dictionaries[0];
+	var mergedDictionary = {};
 	var conflicts = {};
-	_dictionaries.slice(1).forEach(function(dictionary) {
+	_dictionaries.forEach(function(dictionary) {
 		Object.keys(dictionary).forEach(function(strokes) {
-			if(mergedDictionary.hasOwnProperty(strokes)
-				&& mergedDictionary[strokes] !== dictionary[strokes]
-				&& (!conflicts.hasOwnProperty(strokes)
-					|| conflicts[strokes].indexOf(dictionary[strokes]) === -1))
+			if(!mergedDictionary.hasOwnProperty(strokes))
+				mergedDictionary[strokes] = dictionary[strokes];
+			else if(mergedDictionary[strokes] !== dictionary[strokes])
 			{
 				if(!conflicts.hasOwnProperty(strokes))
 					conflicts[strokes] = [mergedDictionary[strokes]];
-				conflicts[strokes].push(dictionary[strokes]);
+				if(conflicts[strokes].indexOf(dictionary[strokes]) === -1)
+					conflicts[strokes].push(dictionary[strokes]);
 			}
-			else
-				mergedDictionary[strokes] = dictionary[strokes];
 		});
 	});
 
@@ -147,7 +145,10 @@ angular.module('json-dictionary-merge', [])
 		if(this.outputDictionary === null)
 			this.outputDictionary = this.mergeDictionaries().dictionary;
 
-		var outputJson = JSON.stringify(this.outputDictionary, null, "\t").replace(/\t/g, "");
+		var outputJson = orderedStringify(
+			this.outputDictionary,
+			undefined,
+			[",\n", ": ", "{\n", "\n}\n", "[\n", "\n]\n"]);
 		downloadBlob(new Blob([outputJson], {type: "application/json"}), "merged.json");
 	};
 

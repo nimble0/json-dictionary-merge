@@ -6,32 +6,52 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
 		<script src="app.js"></script>
 
-		<link rel="stylesheet" href="/style.css">
+		<style>
+		.conflicts>li label {
+			display: inline-block;
+			min-width: 15em;
+			font-family: monospace;
+		}
+		.conflicts>li select {
+			min-width: 20em;
+		}
+		</style>
 	</head>
 	<body>
 		<form ng-controller="MergeController as mergeController">
-			<ul>
-				<li ng-repeat="dictionary in mergeController.inputDictionaries track by $index">
-					<textarea ng-model="dictionary.text"></textarea>
-					<input type="button" value="Remove" ng-click="mergeController.removeInputDictionary($index)">
+			<ul class="files">
+				<li ng-repeat="file in mergeController.inputFiles">
+					<input
+						type="file"
+						multiple
+						files-input
+						ng-model="file.files"
+						on-files-change="mergeController.inputFileSelected(file)">
+					<input type="button" value="Remove" ng-click="mergeController.removeInputFile($index)">
 				</li>
 			</ul>
-			<input type="button" value="Add Dictionary" ng-click="mergeController.addInputDictionary()">
+			<input type="button" value="Add File" ng-click="mergeController.addInputFile()">
 
-			<ul>
-				<li ng-repeat="(strokes, conflicts) in mergeController.conflicts">
-					<label>{{strokes}}</label>
+			<hr>
+
+			<input type="button" value="Find Conflicts" ng-click="mergeController.findConflicts()">
+
+			<ul class="conflicts">
+				<li ng-repeat="conflict in mergeController.conflicts | toArray: 'strokes' | orderBy: 'strokes'">
+					<label>{{conflict.strokes}}</label>
 					<select
-						ng-options="option for option in conflicts.options track by option"
-						ng-model="conflicts.selectedOption"
-						ng-change="mergeController.conflictOptionSelected(strokes, conflicts.selectedOption)">
+						ng-options="option for option in conflict.options track by option"
+						ng-model="conflict.selectedOption"
+						ng-change="mergeController.conflictOptionSelected(
+							conflict.strokes,
+							conflict.selectedOption)">
 					</select>
 				</li>
 			</ul>
 
-			<input type="button" value="Update" ng-click="mergeController.update()">
+			<hr>
 
-			<textarea ng-model="mergeController.outputDictionaryJson"></textarea>
+			<input type="button" value="Save" ng-click="mergeController.saveMergedDictionary()">
 		</form>
 	</body>
 </html>

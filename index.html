@@ -35,6 +35,21 @@
 
 			<hr>
 
+			<div ng-if="mergeController.badFiles.length > 0">
+				<h4>Error reading:</h4>
+				<ul>
+					<li ng-repeat="file in mergeController.badFiles">{{file.name}}</li>
+				</ul>
+			</div>
+			<div ng-if="mergeController.goodFiles.length > 0">
+				<h4>Merging:</h4>
+				<ul>
+					<li ng-repeat="file in mergeController.goodFiles">{{file.name}}</li>
+				</ul>
+			</div>
+
+			<hr>
+
 			<ul class="conflicts">
 				<li ng-repeat="conflict in mergeController.conflicts | toArray: 'strokes' | orderBy: 'strokes'">
 					<label>{{conflict.strokes}}</label>

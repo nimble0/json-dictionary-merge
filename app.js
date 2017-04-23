@@ -84,28 +84,66 @@ angular.module('json-dictionary-merge', [])
 		this.findConflicts();
 	};
 
-	this.inputFileSelected = function(_file)
+	this.inputFileSelected = function(_inputFile)
 	{
+		_inputFile.goodFiles = [];
+		_inputFile.badFiles = [];
 		this.outputDictionary = null;
 
-		var count = { _: _file.files.length};
+		var count = { _: _inputFile.files.length};
 		this_ = this;
 
-		_file.content = [];
-		for(var i = 0; i < _file.files.length; ++i)
+		_inputFile.content = [];
+		for(var i = 0; i < _inputFile.files.length; ++i)
 		{
-			var file = _file.files[i];
+			var file = _inputFile.files[i];
 			var fileReader = new FileReader();
-			fileReader.onload = function(e) {
-				_file.content.push(JSON.parse(e.target.result));
-				if(--count._ == 0)
-					$scope.$apply(function() { this_.findConflicts(); });
-			};
+			fileReader.onloadend = function(_file)
+			{
+				return function(e)
+				{
+					try
+					{
+						if(e.target.readyState !== 2 || e.target.error !== null)
+							throw "FileReader Error";
+						_inputFile.content.push(JSON.parse(e.target.result));
+						_inputFile.goodFiles.push({name: _file.name});
+					}
+					catch(error)
+					{
+						_inputFile.badFiles.push({name: _file.name});
+					}
+
+					if(--count._ === 0)
+						$scope.$apply(function() { this_.findConflicts(); });
+				};
+			}(file);
 			fileReader.readAsText(file, "UTF-8");
 		}
 
-		if(_file.files.length == 0)
+		if(_inputFile.files.length === 0)
 			this.findConflicts();
+	};
+
+	this.updateFileLists = function()
+	{
+		this_ = this;
+
+		this.goodFiles = [];
+		this.inputFiles.forEach(function(file) {
+			if(file.hasOwnProperty("goodFiles"))
+				file.goodFiles.forEach(function(file) {
+					this_.goodFiles.push(file);
+				});
+		});
+
+		this.badFiles = [];
+		this.inputFiles.forEach(function(file) {
+			if(file.hasOwnProperty("badFiles"))
+				file.badFiles.forEach(function(file) {
+					this_.badFiles.push(file);
+				});
+		});
 	};
 
 	this.mergeDictionaries = function()
@@ -123,6 +161,8 @@ angular.module('json-dictionary-merge', [])
 
 	this.findConflicts = function()
 	{
+		this.updateFileLists();
+
 		var mergedDictionary = this.mergeDictionaries();
 		this.outputDictionary = mergedDictionary.dictionary;
 
@@ -153,6 +193,8 @@ angular.module('json-dictionary-merge', [])
 	};
 
 	this.inputFiles = [{text: ""}];
+	this.goodFiles = [];
+	this.badFiles = [];
 	this.outputDictionary = {};
 
 	this.conflicts = {};
